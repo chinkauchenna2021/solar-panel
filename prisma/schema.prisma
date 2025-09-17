@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model user {
+  id           String         @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String         @unique
+  password     String
+  isVerified   Boolean        @default(false)
+  country      String
+  address      String?
+  phone        String?
+  city         String?
+  state        String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime       @default(now())
+  profileImage String?        @default("https://example.com/default-avatar.jpg")
+  cart         Cart[]
+  favorites    Favorite[]
+  reviews      Review[]
+  order        Order[]
+  notification Notification[]
+}
+
+model Otp {
+  email     String
+  code      String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  id        Int      @id @default(autoincrement())
+}
+
+model Banner {
+  title     String
+  subtitle  String?
+  imageUrl  String
+  actionUrl String?
+  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+}
+
+model Category {
+  label     String
+  image     String
+  createdAt DateTime  @default(now())
+  id        Int       @id @default(autoincrement())
+  products  Product[]
+}
+
+model Product {
+  title          String
+  price          Float
+  oldPrice       Float?
+  rating         Float?
+  imageUrl       String?
+  isFavorite     Boolean                @default(false)
+  inStock        Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  brand          String
+  efficiency     Float?
+  isNew          Boolean                @default(false)
+  isOffGrid      Boolean                @default(false)
+  isPopular      Boolean                @default(false)
+  isPortable     Boolean                @default(false)
+  stockQuantity  Int                    @default(0)
+  id             Int                    @id @default(autoincrement())
+  categoryId     Int
+  cartItems      CartItem[]
+  favorites      Favorite[]
+  category       Category               @relation(fields: [categoryId], references: [id])
+  colors         ProductColor[]
+  images         ProductImage[]
+  sizes          ProductSize[]
+  specifications ProductSpecification[]
+  reviews        Review[]
+  orderItem      OrderItem[]
+}
+
+model ProductImage {
+  url       String
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductSize {
+  id        String  @id @default(cuid())
+  size      String
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductColor {
+  color     String
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductSpecification {
+  key       String
+  value     String
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  rating    Float
+  subject   String?
+  comment   String?
+  helpful   Int      @default(0)
+  images    String[] @default([])
+  createdAt DateTime @default(now())
+  userId    String
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  userId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  id        Int        @id @default(autoincrement())
+  user      user       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  productId Int
+  quantity  Int      @default(1)
+  size      String?
+  color     String?
+  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  productId Int
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+//ORDER MANAGEMENT 
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          String
+  user            user        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           OrderItem[]
+  subtotal        Decimal?    @db.Decimal(10, 2) //  added this
+  shipping        Decimal?    @db.Decimal(10, 2) //  added this
+  tax             Decimal?    @db.Decimal(10, 2) // added this
+  total           Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  trackingId      String      @unique
+  paymentRef      String? // Paystack reference
+  shippingAddress Json // Store shipping info as JSON
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  processingAt DateTime?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  FAILED
+}
+
+//notification 
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String
+  icon      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  actionUrl String?
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
