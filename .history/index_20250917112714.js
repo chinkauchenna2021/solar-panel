@@ -40,17 +40,9 @@ app.use('/api/v1', userRoughter)
 
 
 
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-app.get("/health", async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`; // checks DB
-    res.status(200).json({ status: "ok", db: "connected", timestamp: new Date().toISOString() });
-  } catch (err) {
-    console.error("DB connection failed:", err);
-    res.status(500).json({ status: "error", db: "disconnected", timestamp: new Date().toISOString() });
-  }
-});
+// import { PrismaClient } from "@prisma/client";
+
+// const prisma = new PrismaClient();
 
 
 

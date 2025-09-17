@@ -41,6 +41,7 @@ app.use('/api/v1', userRoughter)
 
 
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 app.get("/health", async (req, res) => {
   try {
