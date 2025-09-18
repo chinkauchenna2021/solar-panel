@@ -186,12 +186,12 @@ const  { email } = req.body;
 export {resendOtp}
 
 
+
 //login
- const loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
 
-   
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -203,7 +203,6 @@ export {resendOtp}
       });
     }
 
-    // 2. pashword verify
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({
@@ -212,11 +211,11 @@ export {resendOtp}
       });
     }
 
-    // 3. Token expiry (short if no rememberMe, long if rememberMe)
-    const accessTokenExpiry = rememberMe ? "7d" : "1h";
+    // Expirations
+    const accessTokenExpiry = rememberMe ? "7d" : "2d";
     const refreshTokenExpiry = "30d";
 
-    // 4. Generate tokens
+    // Generate tokens
     const accessToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,
@@ -228,6 +227,18 @@ export {resendOtp}
       process.env.JWT_SECRET,
       { expiresIn: refreshTokenExpiry }
     );
+
+    // Store refresh token in DB
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 2); //two days
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt,
+      },
+    });
 
     return res.json({
       success: true,
@@ -241,7 +252,7 @@ export {resendOtp}
           lastName: user.lastName,
           email: user.email,
           country: user.country,
-          profileImage: user.profileImage, 
+          profileImage: user.profileImage,
         },
       },
     });
@@ -253,5 +264,6 @@ export {resendOtp}
     });
   }
 };
+
 export {loginUser }
 
