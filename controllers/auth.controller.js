@@ -227,6 +227,8 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: refreshTokenExpiry }
     );
+    console.log(refreshToken);
+    
 
     // Store refresh token in DB
     const expiresAt = new Date();
@@ -260,7 +262,7 @@ const loginUser = async (req, res) => {
     console.error("Login error:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error,
     });
   }
 };
