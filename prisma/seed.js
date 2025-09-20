@@ -5,7 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting seed...");
 
-  // --- 1. Clear existing data ---
+
+  // Delete in reverse order of dependencies
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
   await prisma.review.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.cartItem.deleteMany();
@@ -37,123 +40,425 @@ async function main() {
   // --- 3. Seed Categories ---
   await prisma.category.createMany({
     data: [
-      { label: "Monocrystalline", image: "https://example.com/mono.jpg" },
-      { label: "Polycrystalline", image: "https://example.com/poly.jpg" },
+      { label: "Solar Panels", image: "https://example.com/panels.jpg" },
+      { label: "Inverters", image: "https://example.com/inverters.jpg" },
+      { label: "Batteries", image: "https://example.com/batteries.jpg" },
+      { label: "Accessories", image: "https://example.com/accessories.jpg" },
     ],
   });
 
-  const mono = await prisma.category.findFirst({ where: { label: "Monocrystalline" } });
-  const poly = await prisma.category.findFirst({ where: { label: "Polycrystalline" } });
 
-  // --- 4. Seed Products ---
-  const product1 = await prisma.product.create({
-    data: {
-      title: "Monocrystalline Solar Panel 200W",
-      price: 150.0,
-      oldPrice: 200.0,
-      rating: 4.5,
-      imageUrl: "https://example.com/panel1.jpg",
+  const solarPanelsCategory = await prisma.category.findFirst({ where: { label: "Solar Panels" } });
+
+  // Products dataset (24 items)
+  const products = [
+    {
+      title: "Solar Pane l350W",
+      price: 250,
+      oldPrice: 300,
+      rating: 4.8,
+      imageUrl: "https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg",
+      category: 'Solar Panels',
       brand: "SunPower",
-      inStock: true,
-      stockQuantity: 50,
-      categoryId: mono.id,
+      description: "High-efficiency 350W solar panel designed formaximum energy output. Durable and weather-resistant.",
+      sizes: ["100W", "200W", "350W", "400W"],
+      colors: ["Black", "Blue", "Silver"],
+      images: [
+        "https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg",
+        "https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg",
+        "https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg",
+      ],
     },
-  });
-
-  const product2 = await prisma.product.create({
-    data: {
-      title: "Polycrystalline Solar Panel 150W",
-      price: 100.0,
-      oldPrice: 120.0,
-      rating: 4.0,
-      imageUrl: "https://example.com/panel2.jpg",
-      brand: "EcoSolar",
-      inStock: true,
-      stockQuantity: 80,
-      categoryId: poly.id,
+    {
+      title: "Solar Panel 400W Monocrystalline",
+      price: 320,
+      oldPrice: 380,
+      rating: 4.9,
+      imageUrl: "https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg",
+      category: 'Solar Panels',
+      brand: "Canadian Solar",
+      description: "Premium 400W monocrystalline solar panel with superior efficiency and 25-year warranty.",
+      sizes: ["300W", "350W", "400W", "450W"],
+      colors: ["Black", "Silver"],
+      images: [
+        "https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg",
+        "https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg",
+        "https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg",
+      ],
     },
-  });
+    {
+      title: 'Solar Panel 500W Bifacial',
+      price: '450.00',
+      oldPrice: '520.00',
+      rating: 4.8,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      category: 'Solar Panels',
+      brand: 'Jinko Solar',
+      description: 'Advanced 500W bifacial solar panel capturing light from both sides for maximum efficiency.',
+      sizes: ['400W', '450W', '500W', '550W'],
+      colors: ['Black', 'Blue', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 300W Polycrystalline',
+      price: '220.00',
+      oldPrice: '270.00',
+      rating: 4.6,
+      imageUrl: 'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      category: 'Solar Panels',
+      brand: 'TrinaSolar',
+      description: 'Cost-effective 300W polycrystalline solarpanel with reliable performance and durability.',
+      sizes: ['250W', '300W', '350W'],
+      colors: ['Blue', 'Black'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 450W PERC Technology',
+      price: '380.00',
+      oldPrice: '450.00',
+      rating: 4.9,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      category: 'Solar Panels',
+      brand: 'LONGiSolar',
+      description: 'High-performance 450W PERCtechnology solar panel with enhanced light absorption.',
+      sizes: ['350W', '400W', '450W', '500W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 200W Flexible',
+      price: '180.00',
+      oldPrice: '220.00',
+      rating: 4.4,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+      category: 'Solar Panels',
+      brand: 'Renogy',
+      description: 'Light weight 200W  flexible solar panel perfect for RVs, boats, and curved surfaces.',
+      sizes: ['100W', '150W', '200W'],
+      colors: ['Black'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 600W Tier-1',
+      price: '520.00',
+      oldPrice: '600.00',
+      rating: 4.9,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      category: 'Solar Panels',
+      brand: 'First Solar',
+      description: 'Premium 600W tier-1 solar panel with industry-leading efficiency and reliability.',
+      sizes: ['500W', '550W', '600W', '650W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 250W BudgetSeries',
+      price: '160.00',
+      oldPrice: '200.00',
+      rating: 4.3,
+      imageUrl: 'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      category: 'Solar Panels',
+      brand: 'Yingli Solar',
+      description: 'Affordable 250W solar panel offering excellent value for residential installations.',
+      sizes: ['200W', '250W', '300W'],
+      colors: ['Blue', 'Black'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 380W Half-CutCell',
+      price: '290.00',
+      oldPrice: '340.00',
+      rating: 4.7,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      category: 'Solar Panels',
+      brand: 'HanwhaQCELLS',
+      description: 'Innovative 380W half-cutcell solar panel with reduced power losses and improved performance.',
+      sizes: ['320W', '350W', '380W', '420W'],
+      colors: ['Black', 'Silver', 'Blue'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 550W CommercialGrade',
+      price: '480.00',
+      oldPrice: '560.00',
+      rating: 4.8,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+      category: 'Solar Panels',
+      brand: 'JASolar',
+      description: 'Heavy-duty 550W commercial-grade solar panel designed for large-scale installations.',
+      sizes: ['450W', '500W', '550W', '600W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 150W Portable',
+      price: '140.00',
+      oldPrice: '170.00',
+      rating: 4.5,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      category: 'Solar Panels',
+      brand: 'GoalZero',
+      description: 'Compact 150W portable solar  panel with foldable design for camping and out door use.',
+      sizes: ['100W', '150W', '200W'],
+      colors: ['Black', 'Green'],
+      images: [
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 420WAll-Black',
+      price: '360.00',
+      oldPrice: '420.00',
+      rating: 4.8,
+      imageUrl: 'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      category: 'Solar Panels',
+      brand: 'SunPower',
+      description: 'Sleek 420W all-black solar panel with premium aesthetics and highe fficiency.',
+      sizes: ['350W', '380W', '420W', '450W'],
+      colors: ['Black'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 320W ThinFilm',
+      price: '240.00',
+      oldPrice: '290.00',
+      rating: 4.4,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      category: 'Solar Panels',
+      brand: 'Sharp Solar',
+      description: 'Advanced 320W thin-film solar panel with excellent low-light performance.',
+      sizes: ['280W', '300W', '320W', '350W'],
+      colors: ['Black', 'Blue'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 480W HighOutput',
+      price: '410.00',
+      oldPrice: '480.00',
+      rating: 4.7,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+      category: 'Solar Panels',
+      brand: 'RECSolar',
+      description: 'High-output 480W solar panel with advanced cell technology and superior performance.',
+      sizes: ['400W', '440W', '480W', '520W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 180W MarineGrade',
+      price: '200.00',
+      oldPrice: '240.00',
+      rating: 4.6,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      category: 'Solar Panels',
+      brand: 'Victron Energy',
+      description: 'Marine-grade1 80W  solar panel with corrosion-resistant frame for boat installations.',
+      sizes: ['120W', '150W', '180W', '220W'],
+      colors: ['Blue', 'Black'],
+      images: [
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 650W MegaPower',
+      price: '580.00',
+      oldPrice: '650.00',
+      rating: 4.9,
+      imageUrl: 'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      category: 'Solar Panels',
+      brand: 'SuntechPower',
+      description: 'Ultra-high power 650W solar panel formaximum energy generation inlimited space.',
+      sizes: ['550W', '600W', '650W', '700W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 270W Residential',
+      price: '190.00',
+      oldPrice: '230.00',
+      rating: 4.5,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      category: 'Solar Panels',
+      brand: 'KyoceraSolar',
+      description: 'Reliable 270W residential solar panel with provent rack record and solid warranty.',
+      sizes: ['240W', '270W', '300W', '330W'],
+      colors: ['Blue', 'Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 390W PremiumEfficiency',
+      price: '330.00',
+      oldPrice: '390.00',
+      rating: 4.8,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+      category: 'Solar Panels',
+      brand: 'PanasonicSolar',
+      description: 'Premium 390W solar panel with industry-leading efficiency and temperature coefficient.',
+      sizes: ['330W', '360W', '390W', '420W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 125W Off-Grid',
+      price: '110.00',
+      oldPrice: '140.00',
+      rating: 4.3,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      category: 'Solar Panels',
+      brand: 'AIMSPower',
+      description: 'Compact 125W solar panel ideal for off-grid cabinsandsmall powery stems.',
+      sizes: ['75W', '100W', '125W', '160W'],
+      colors: ['Blue', 'Black'],
+      images: [
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 520W DualGlass',
+      price: '460.00',
+      oldPrice: '520.00',
+      rating: 4.9,
+      imageUrl: 'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      category: 'Solar Panels',
+      brand: 'SeraphimSolar',
+      description: 'Advanced 520W dual-glass solar panel with enhanced durability and 30-year warranty.',
+      sizes: ['450W', '480W', '520W', '560W'],
+      colors: ['Black', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-175.jpg',
+      ]
+    },
+    {
+      title: 'Solar Panel 340W Mid-Range',
+      price: '260.00',
+      oldPrice: '310.00',
+      rating: 4.6,
+      imageUrl: 'https://img.freepik.com/free-psd/solar-power-boards-roof-3d-realistic-render_625553-338.jpg',
+      category: 'Solar Panels',
+      brand: 'AstronergySolar',
+      description: 'Well-balanced 340W solar panel offering good performance at competitive pricing.',
+      sizes: ['300W', '320W', '340W', '370W'],
+      colors: ['Black', 'Blue', 'Silver'],
+      images: [
+        'https://img.freepik.com/free-psd/solar-power-boards-3d-realistic-render_625553-173.jpg',
+        'https://img.freepik.com/free-psd/highefficiency-solar-panel-array-clean-energy-solution_191095-79165.jpg',
+      ]
+    }
+  ];
 
-  // --- 5. Product Images ---
-  await prisma.productImage.createMany({
-    data: [
-      { productId: product1.id, url: "https://example.com/panel1a.jpg" },
-      { productId: product1.id, url: "https://example.com/panel1b.jpg" },
-      { productId: product2.id, url: "https://example.com/panel2a.jpg" },
-    ],
-  });
+  // Insert Products with relations
+  const createdProducts = [];
+  for (const product of products) {
+    const created = await prisma.product.create({
+      data: {
+        title: product.title,
+        description: product.description,
+        price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+        oldPrice: typeof product.oldPrice === 'string' ? parseFloat(product.oldPrice) : product.oldPrice,
+        rating: product.rating,
+        imageUrl: product.imageUrl,
+        brand: product.brand,
+        categoryId: solarPanelsCategory.id,
+        images: {
+          create: product.images.map((url) => ({ url })),
+        },
+        sizes: {
+          create: product.sizes.map((size) => ({ size })),
+        },
+        colors: {
+          create: product.colors.map((color) => ({ color })),
+        },
+      },
+    });
+    createdProducts.push(created);
+    console.log(`✅ Created product: ${created.title}`);
+  }
 
-  // --- 6. Product Sizes ---
-  await prisma.productSize.createMany({
-    data: [
-      { productId: product1.id, size: "200W" },
-      { productId: product2.id, size: "150W" },
-    ],
-  });
 
-  // --- 7. Product Colors ---
-  await prisma.productColor.createMany({
-    data: [
-      { productId: product1.id, color: "Black" },
-      { productId: product2.id, color: "Blue" },
-    ],
-  });
 
-  // --- 8. Product Specs ---
-  await prisma.productSpecification.createMany({
-    data: [
-      { productId: product1.id, key: "Efficiency", value: "22%" },
-      { productId: product1.id, key: "Warranty", value: "25 years" },
-      { productId: product2.id, key: "Efficiency", value: "18%" },
-    ],
-  });
 
-  // --- 9. User-dependent seeding (skip if no user exists) ---
+  // --- 9. User-dependent seeding (optional) ---
   const user = await prisma.user.findFirst();
   if (user) {
-    // Reviews
     await prisma.review.createMany({
       data: [
         {
-          productId: product1.id,
+          productId:  createdProducts[0].id,
           userId: user.id,
           rating: 5,
-          comment: "Excellent panel, works perfectly!",
+          comment: "Excellent solar panel, powers my home perfectly!",
         },
         {
-          productId: product2.id,
+          productId:  createdProducts[1].id,
           userId: user.id,
           rating: 4,
-          comment: "Good value for the price.",
+          comment: "Solid inverter, but a bit pricey.",
         },
       ],
     });
 
-    // Cart
     const cart = await prisma.cart.create({
       data: {
         userId: user.id,
         items: {
           create: [
-            { productId: product1.id, quantity: 2, size: "200W", color: "Black" },
-            { productId: product2.id, quantity: 1, size: "150W", color: "Blue" },
+            { productId:  createdProducts[0].id, quantity: 2, size: "350W", color: "Black" },
+            { productId:  createdProducts[1].id, quantity: 1, size: "5kVA", color: "White" },
           ],
         },
       },
       include: { items: true },
     });
-    console.log("🛒 Cart created:", cart.id);
 
-    // Favorites
-    // await prisma.favorite.createMany({
-    //   data: [
-    //     { userId: user.id, productId: product1.id },
-    //     { userId: user.id, productId: product2.id },
-    //   ],
-    // });
-    // console.log("⭐ Favorites added for user:", user.email);
+    console.log("🛒 Cart created:", cart.id);
   } else {
-    console.log("⚠️ No user found, skipping reviews, cart, and favorites.");
+    console.log("⚠️ No user found, skipping reviews and cart.");
   }
 
   console.log("✅ Seeding complete!");
