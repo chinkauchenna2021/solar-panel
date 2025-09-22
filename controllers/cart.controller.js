@@ -66,6 +66,8 @@ export { addToCart };
 const getCart = async (req, res) => {
   try {
      const userId = req.userId;
+     console.log("userId in getCart:", userId, typeof userId);
+
 
     if (!userId) {
       return res.status(400).json({ success: false, message: "userId is required" });

@@ -58,26 +58,26 @@ model Category {
 }
 
 model Product {
-  id             Int                    @id @default(autoincrement())
-  title          String
-  description    String?                // ✅ added this
-  price          Float
-  oldPrice       Float?
-  rating         Float?
-  imageUrl       String?
-  isFavorite     Boolean                @default(false)
-  inStock        Boolean                @default(true)
-  createdAt      DateTime               @default(now())
-  brand          String
-  efficiency     Float?
-  isNew          Boolean                @default(false)
-  isOffGrid      Boolean                @default(false)
-  isPopular      Boolean                @default(false)
-  isPortable     Boolean                @default(false)
-  stockQuantity  Int                    @default(0)
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String? // ✅ added this
+  price         Float
+  oldPrice      Float?
+  rating        Float?
+  imageUrl      String?
+  isFavorite    Boolean  @default(false)
+  inStock       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  brand         String
+  efficiency    Float?
+  isNew         Boolean  @default(false)
+  isOffGrid     Boolean  @default(false)
+  isPopular     Boolean  @default(false)
+  isPortable    Boolean  @default(false)
+  stockQuantity Int      @default(0)
 
-  categoryId     Int
-  category       Category               @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
 
   cartItems      CartItem[]
   favorites      Favorite[]
@@ -88,7 +88,6 @@ model Product {
   reviews        Review[]
   orderItem      OrderItem[]
 }
-
 
 model ProductImage {
   url       String
@@ -134,7 +133,7 @@ model Review {
 }
 
 model Cart {
-  userId    String
+  userId    String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   id        Int        @id @default(autoincrement())

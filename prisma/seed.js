@@ -21,7 +21,7 @@ async function main() {
   await prisma.category.deleteMany();
   await prisma.banner.deleteMany();
 
-  // --- 2. Seed Banners ---
+  // -- Seed Banners ---
   await prisma.banner.createMany({
     data: [
       {
@@ -37,18 +37,23 @@ async function main() {
     ],
   });
 
-  // --- 3. Seed Categories ---
+  // ---  Seed Categories ---
   await prisma.category.createMany({
     data: [
-      { label: "Solar Panels", image: "https://example.com/panels.jpg" },
-      { label: "Inverters", image: "https://example.com/inverters.jpg" },
-      { label: "Batteries", image: "https://example.com/batteries.jpg" },
-      { label: "Accessories", image: "https://example.com/accessories.jpg" },
+      { label: "Monocrystalline", image: "  https://atlas-content-cdn.pixelsquid.com/stock-images/monocrystalline-solar-panels-cell-PO93E48-600.jpg " },
+      { label: "Polycrystalline", image: "https://www.swiftermall.com/3618-large_default/mercury-260w-24v-polycrystalline-solar-panel.jpg" },
+      { label: "Thin-Film", image: "https://images.squarespace-cdn.com/content/v1/63edb9b9c075c9465b1fc838/63c04cef-54d5-4811-b46f-436cce496cca/thin-film-solar-panels.jpg?format=2500w" },
+      { label: "Portable", image: "https://antigravitybatteries.com/wp-content/uploads/2022/03/antigravity-xs200-portable-solar-panel-200-watt.jpg" },
+      {
+        label: 'Solar Roof Tiles',
+        image: 'https://hanergy.eu/wp-content/uploads/2018/01/hantiles_los.jpg'
+      },
+
     ],
   });
 
 
-  const solarPanelsCategory = await prisma.category.findFirst({ where: { label: "Solar Panels" } });
+  const solarPanelsCategory = await prisma.category.findFirst({ where: { label: "Monocrystalline" } });
 
   // Products dataset (24 items)
   const products = [
@@ -423,19 +428,19 @@ async function main() {
 
 
 
-  // --- 9. User-dependent seeding (optional) ---
+  // User-dependent seeding 
   const user = await prisma.user.findFirst();
   if (user) {
     await prisma.review.createMany({
       data: [
         {
-          productId:  createdProducts[0].id,
+          productId: createdProducts[0].id,
           userId: user.id,
           rating: 5,
           comment: "Excellent solar panel, powers my home perfectly!",
         },
         {
-          productId:  createdProducts[1].id,
+          productId: createdProducts[1].id,
           userId: user.id,
           rating: 4,
           comment: "Solid inverter, but a bit pricey.",
@@ -448,8 +453,8 @@ async function main() {
         userId: user.id,
         items: {
           create: [
-            { productId:  createdProducts[0].id, quantity: 2, size: "350W", color: "Black" },
-            { productId:  createdProducts[1].id, quantity: 1, size: "5kVA", color: "White" },
+            { productId: createdProducts[0].id, quantity: 2, size: "350W", color: "Black" },
+            { productId: createdProducts[1].id, quantity: 1, size: "5kVA", color: "White" },
           ],
         },
       },
