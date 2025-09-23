@@ -27,10 +27,10 @@ app.use('/api/v1', favoritesRouter);
 //orders
 app.use('/api/v1', ordersRouter);
 //notification
-app.use('/api/v1', NotificationsRoughter)
+app.use('/api/v1', NotificationsRoughter);
 
 //user
-app.use('/api/v1', userRoughter)
+app.use('/api/v1', userRoughter);
 
 
 

@@ -4,7 +4,7 @@ import { prisma } from "../db/prisma.js";
 // PUT /user/location
 const updateUserLocation = async (req, res) => {
   try {
-    const userId = req.user?.id; 
+    const userId = req.userId 
     if (!userId) {
       return res.status(401).json({
         success: false,

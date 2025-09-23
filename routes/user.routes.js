@@ -5,6 +5,6 @@ import { updateUserLocation ,getUserProfile} from "../controllers/user.controlle
 const userRoughter = Router()
 
 userRoughter.put('/user/location', authMiddleware,  updateUserLocation); 
-userRoughter.put('/user/profile', authMiddleware, getUserProfile);
+userRoughter.get('/user/profile', authMiddleware, getUserProfile);
 
 export default userRoughter;
